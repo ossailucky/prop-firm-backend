@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 //import { MailService } from 'src/mail/mail.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthDTO } from 'src/auth/dto/create-auth.dto';
 
 @Injectable()
 export class UserService {
@@ -168,17 +169,17 @@ export class UserService {
 // //     return bcrypt.compare(password, hashedPassword);
 // //   }
 
-// //   async findUser(data: AuthDTO): Promise<any> {
-// //     try {
-// //       const user = await this.usersRepository.findOne({where:{email: data.email}});
+  async findUser(data: AuthDTO): Promise<any> {
+    try {
+      const user = await this.usersRepository.findOne({where:{email: data.email}});
     
-// //       if(!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      if(!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         
-// //       return user;
-// //     } catch (error) {
-// //       throw error;
-// //     }
-// //   }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
 
 // //   async uploadProfilePicture(id:number, imageUrl:string) : Promise<User> {
 // //       try {  

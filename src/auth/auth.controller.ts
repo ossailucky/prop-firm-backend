@@ -1,34 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthDTO, UserVerifyeDTO } from './dto/create-auth.dto';
+import { Response } from 'express';
+import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
-@Controller('auth')
+ApiTags("auth")
+@Controller({version: "1", path: "auth"})
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService
+  ) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post("login")
+  async login(@Res() res: Response, @Body() authDto: AuthDTO){
+    const { data, token } = await this.authService.validate(authDto);
+
+    res.setHeader('Authorization', `Bearer ${token}`);
+    res.json({data, token});
+    
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post("register")
+  async register(@Res() res: Response, @Body() userDto: CreateUserDto){
+    const data = await this.userService.create(userDto);
+    const token = await this.authService.getToken({
+      id:data.id,
+      email:data.email
+    })
+    res.setHeader('Authorization', `Bearer ${token}`);
+    res.json({data, token});
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
+  // @Patch('verify-email')
+  // async verify(@Query('token') token: string) {
+  //   return this.userService.verifyEmail(token);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
 }
