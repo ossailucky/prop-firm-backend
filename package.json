@@ -44,7 +44,8 @@
     "passport-jwt": "^4.0.1",
     "socket.io": "^4.8.1",
     "typeorm": "^0.3.25",
-    "@nestjs/jwt": "^11.0.0"
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs-modules/mailer": "^2.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

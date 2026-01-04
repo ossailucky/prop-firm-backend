@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from 'src/mail/mail.module';
 
 
 @Module({
@@ -13,8 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.EMAIL_SECRET || 'supersecretkey',
       signOptions: { expiresIn: "1h"},
     }),
-    // forwardRef(() => MailModule),
-    // forwardRef(() => NftModule),
+     forwardRef(() => MailModule),
     // forwardRef(() => NotificationModule),
   ],
   providers: [UserService],

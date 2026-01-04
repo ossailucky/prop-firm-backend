@@ -5,7 +5,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto} from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-//import { MailService } from 'src/mail/mail.service';
+import { MailService } from 'src/mail/mail.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthDTO } from 'src/auth/dto/create-auth.dto';
 
@@ -15,7 +15,7 @@ export class UserService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private readonly jwtService: JwtService,
-    // private readonly mailService: MailService,
+     private readonly mailService: MailService,
     // private readonly notificationService: NotificationService
   ) {}
 
@@ -42,8 +42,8 @@ export class UserService {
         password: hashedPassword,
       });
     
-      // const url = `${process.env.APP_URL}/verify-email?token=${tokenSign}`;
-      // await this.mailService.sendEmailVerification(userData.email, url, userData.username);
+      const url = `${process.env.APP_URL}/verify-email?token=${tokenSign}`;
+      await this.mailService.verifyEmail(userData.email, url, userData.fullName);
 
 
       return this.usersRepository.save(user);
@@ -54,54 +54,54 @@ export class UserService {
     
   }
 
-// //   async resendVerification(email: string) {
-// //     try {
-// //       const user = await this.usersRepository.findOne({
-// //         where: { email: email },
-// //       });
-// //       if (!user) throw new NotFoundException('User not found');
-// //       if (user.isEmailVerified) return { message: 'Email is already verified.' };
+  async resendVerification(email: string) {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { email: email },
+      });
+      if (!user) throw new NotFoundException('User not found');
+      if (user.isEmailVerified) return { message: 'Email is already verified.' };
     
-// //       const token = this.jwtService.sign(
-// //         { email: user.email }
-// //       );
+      const token = this.jwtService.sign(
+        { email: user.email }
+      );
     
     
-// //       const url = `${process.env.APP_URL}/verify-email?token=${token}`;
+      const url = `${process.env.APP_URL}/verify-email?token=${token}`;
   
         
   
-// //       await this.mailService.verifyEmail(user.email, url, user.fullName);
-// //       return { message: 'Email Verification link sent to your email.' };
+      await this.mailService.verifyEmail(user.email, url, user.fullName);
+      return { message: 'Email Verification link sent to your email.' };
        
-// //     } catch (error) {
-// //       throw error;
-// //     }
+    } catch (error) {
+      throw error;
+    }
    
-// //  }
+ }
 
-// //  async verifyEmail(token: string) {
-// //   try {
-// //     const payload = this.jwtService.verify(token, { secret: process.env.JWT_EMAIL_SECRET });
+ async verifyEmail(token: string) {
+  try {
+    const payload = this.jwtService.verify(token, { secret: process.env.JWT_EMAIL_SECRET });
 
-// //     if (!payload || typeof payload.email !== 'string') {
-// //       throw new BadRequestException('Invalid token payload.');
-// //     }
-// //     // Find the user by email
-// //     const user = await this.usersRepository.findOne({
-// //       where: { email: payload.email },
-// //     });
-// //     if (!user) throw new NotFoundException('User not found');
+    if (!payload || typeof payload.email !== 'string') {
+      throw new BadRequestException('Invalid token payload.');
+    }
+    // Find the user by email
+    const user = await this.usersRepository.findOne({
+      where: { email: payload.email },
+    });
+    if (!user) throw new NotFoundException('User not found');
 
-// //     if (user.isEmailVerified) return { message: 'Email already verified.' };
+    if (user.isEmailVerified) return { message: 'Email already verified.' };
 
-// //     user.isEmailVerified = true;
-// //     await this.usersRepository.save(user);
-// //     return { message: 'Email verified successfully.' };
-// //   } catch (e) {
-// //     throw new BadRequestException('Invalid or expired token');
-// //   }
-// // }
+    user.isEmailVerified = true;
+    await this.usersRepository.save(user);
+    return { message: 'Email verified successfully.' };
+  } catch (e) {
+    throw new BadRequestException('Invalid or expired token');
+  }
+}
 
 // // async forgotPassword(email: string) {
 // //   const user = await this.usersRepository.findOne({where:{ email: email} });

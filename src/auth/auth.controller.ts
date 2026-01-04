@@ -34,9 +34,9 @@ export class AuthController {
     res.json({data, token});
   }
 
-  // @Patch('verify-email')
-  // async verify(@Query('token') token: string) {
-  //   return this.userService.verifyEmail(token);
-  // }
+  @Patch('verify-email')
+  async verify(@Query('token') token: string) {
+    return this.userService.verifyEmail(token);
+  }
 
 }
