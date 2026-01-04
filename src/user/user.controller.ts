@@ -35,43 +35,43 @@ export class UserController {
   resetPassword(@Query('token') token: string, @Body() dto: ResetPasswordDto) {
     return this.userService.resetPassword(dto,token);
   }
-  
-  // @UseGuards(JwtAuthGuard)
-  // @hasRoles(UserRole.ADMIN)
-  // @Get()
-  // findAll() {
-  //   return this.userService.findAll();
-  // }
+
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
 
   // @Get("users")
   // AllInPublic() {
   //   return this.userService.publiceUsers();
   // }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Get("profile")
-  // getUser(@Req() req: any) {
-  //   return this.userService.findById(req.user.id);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get("profile")
+  getUser(@Req() req: any) {
+    return this.userService.findById(req.user.id);
+  }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @hasRoles(UserRole.ADMIN)
-  // @Get(":id")
-  // findUser(@Param('id', ParseIntPipe) id: number,) {
-  //   return this.userService.findById(id);
-  // }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Get(":id")
+  findUser(@Param('id', ParseIntPipe) id: number,) {
+    return this.userService.findById(id);
+  }
 
  
 
   
-  // @UseGuards(JwtAuthGuard)
-  // @Patch()
-  // async update(
-  //   @Req() req: any,
-  //   @Body() updateUserDto: any,
-  // ) {
-  //   return this.userService.updateUser(req.user.id, updateUserDto);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Patch()
+  async update(
+    @Req() req: any,
+    @Body() updateUserDto: any,
+  ) {
+    return this.userService.updateUser(req.user.id, updateUserDto);
+  }
 
   // @Post(':id/message')
   // async message(

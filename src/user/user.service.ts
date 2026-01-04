@@ -136,27 +136,27 @@ async resetPassword(dto: ResetPasswordDto, token:string) {
   }
 }
 
-// //   async findByEmail(email: string): Promise<User | null> {
-// //     return this.usersRepository.findOne({ where: { email } });
-// //   }
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
 
-// //   async findById(id: number): Promise<User> {
-// //     const user = await this.usersRepository.findOne({ 
-// //       where: { id },
-// //       select: ['id', 'email', 'fullName', 'username','phoneNumber', 'role', 'isActive', 'createdAt','country', 'accountBalance', 'bio','profilePicture','website','socialLink', 'isEmailVerified'],});
-// //     if (!user) {
-// //       throw new NotFoundException('User not found');
-// //     }
-// //     return user;
-// //   }
+  async findById(id: number): Promise<User> {
+    const user = await this.usersRepository.findOne({ 
+      where: { id },
+      select: ['id', 'email', 'fullName','phoneNumber', 'role', 'isActive', 'createdAt','country', 'accountBalance', 'isEmailVerified'],});
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
 
-// //   async findAll(): Promise<User[]> {
-// //     return this.usersRepository.find({
-// //       select: ['id', 'email', 'fullName', 'username','phoneNumber', 'role', 'isActive','accountBalance', 'createdAt','isEmailVerified','profilePicture'],
-// //       relations: ['deposits','ownednfts', 'nfts','withdrawals','sales'],
-// //       order: { createdAt: 'DESC' },
-// //     });
-// //   }
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find({
+      select: ['id', 'email', 'fullName','phoneNumber', 'role', 'isActive','accountBalance', 'createdAt','isEmailVerified'],
+      // relations: ['deposits','ownednfts', 'nfts','withdrawals','sales'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 
 // //   async publiceUsers(): Promise<User[]> {
 // //     return this.usersRepository.find({
@@ -181,92 +181,40 @@ async resetPassword(dto: ResetPasswordDto, token:string) {
     }
   }
 
-// //   async uploadProfilePicture(id:number, imageUrl:string) : Promise<User> {
-// //       try {  
-// //         const user = await this.usersRepository.findOne({ where: { id } });
-// //       if (!user) {
-// //         throw new NotFoundException('User not found');
-// //       }
-// //       // Set user Profile Picture
-// //       user.profilePicture = imageUrl;
-      
-// //       // Save updated User
-// //       return this.usersRepository.save(user);
-// //       } catch (error) {
-// //         throw error;
-        
-// //       }
-      
-// //     }
 
-// //     async uploadFrontID(id:number, imageUrl:string) : Promise<User> {
-// //       try {  
-// //         const user = await this.usersRepository.findOne({ where: { id } });
-// //       if (!user) {
-// //         throw new NotFoundException('User not found');
-// //       }
-// //       // Set user Front ID
-// //       user.website = imageUrl;
-      
-// //       // Save updated User
-// //       return this.usersRepository.save(user);
-// //       } catch (error) {
-// //         throw error;
-        
-// //       }
-      
-// //     }
 
-// //     async uploadBackID(id:number, imageUrl:string) : Promise<User> {
-// //       try {  
-// //         const user = await this.usersRepository.findOne({ where: { id } });
-// //       if (!user) {
-// //         throw new NotFoundException('User not found');
-// //       }
-// //       // Set user Front ID
-// //       user.socialLink = imageUrl;
-      
-// //       // Save updated User
-// //       return this.usersRepository.save(user);
-// //       } catch (error) {
-// //         throw error;
-        
-// //       }
-      
-// //     }
+  async updateUser(id: number, updateData: any): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+  
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+  
+    const updatedUser = Object.assign(user, updateData);
+    return this.usersRepository.save(updatedUser);
+  }
 
-// //   async updateUser(id: number, updateData: any): Promise<User> {
-// //     const user = await this.usersRepository.findOne({ where: { id } });
+  async updateDeactive(id: number): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
   
-// //     if (!user) {
-// //       throw new NotFoundException(`User with ID ${id} not found`);
-// //     }
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
   
-// //     const updatedUser = Object.assign(user, updateData);
-// //     return this.usersRepository.save(updatedUser);
-// //   }
+   user.isActive = false;
+    return this.usersRepository.save(user);
+  }
 
-// //   async updateDeactive(id: number): Promise<User> {
-// //     const user = await this.usersRepository.findOne({ where: { id } });
+  async updateActive(id: number): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
   
-// //     if (!user) {
-// //       throw new NotFoundException(`User with ID ${id} not found`);
-// //     }
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
   
-// //    user.isActive = false;
-// //     return this.usersRepository.save(user);
-// //   }
-
-// //   async updateActive(id: number): Promise<User> {
-// //     const user = await this.usersRepository.findOne({ where: { id } });
-  
-// //     if (!user) {
-// //       throw new NotFoundException(`User with ID ${id} not found`);
-// //     }
-  
-// //    user.isActive = true;
-// //     return this.usersRepository.save(user);
-// //   }
+   user.isActive = true;
+    return this.usersRepository.save(user);
+  }
 
 // //   async addUserDeposit(userId: number, depositObject: object) {
 // //     const user = await this.usersRepository.findOne({ where:{id: userId }, relations: ['deposits']});
