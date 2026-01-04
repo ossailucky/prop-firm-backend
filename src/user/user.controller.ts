@@ -26,15 +26,16 @@ export class UserController {
   return this.userService.resendVerification(email);
 }
 
-  // @Post('forgot-password')
-  // forgotPassword(@Body('email') email: string) {
-  //   return this.userService.forgotPassword(email);
-  // }
+  @Post('forgot-password')
+  forgotPassword(@Body('email') email: string) {
+    return this.userService.forgotPassword(email);
+  }
 
-  // @Post('reset-password')
-  // resetPassword(@Query('token') token: string, @Body() dto: ResetPasswordDto) {
-  //   return this.userService.resetPassword(dto,token);
-  // }
+  @Post('reset-password')
+  resetPassword(@Query('token') token: string, @Body() dto: ResetPasswordDto) {
+    return this.userService.resetPassword(dto,token);
+  }
+  
   // @UseGuards(JwtAuthGuard)
   // @hasRoles(UserRole.ADMIN)
   // @Get()
