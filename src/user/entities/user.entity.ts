@@ -1,3 +1,4 @@
+import { Challenge, Taker } from 'src/challenge/entities/challenge.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 
 export enum UserRole {
@@ -53,8 +54,8 @@ export class User {
   accountBalance: number;
 
  
-//   @OneToMany(() => NFT, (nft) => nft.creator)
-//   subscriptions: NFT[];
+  @OneToMany(() => Taker, (challenge) => challenge.challenge)
+  subscriptions: Taker[];
 
 //   @OneToMany(() => Deposit, (deposit) => deposit.user)
 //   deposits: Deposit[];
