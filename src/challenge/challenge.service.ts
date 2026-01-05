@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateChallengeDto } from './dto/create-challenge.dto';
+import { CreateChallengeDto, RequestReviewDto } from './dto/create-challenge.dto';
 import { UserService } from 'src/user/user.service';
 import { MailService } from 'src/mail/mail.service';
-import { Challenge, Taker } from './entities/challenge.entity';
+import { Challenge, Status, Taker } from './entities/challenge.entity';
 
 @Injectable()
 export class ChallengeService {
@@ -78,22 +78,23 @@ export class ChallengeService {
     return challenge;
   }
 
-  // async approveStake(stakerId: number): Promise<Staker> {
-  //   const stake = await this.stakerRepository.findOneBy({ id: stakerId });
-  //   if (!stake) {
-  //     throw new NotFoundException(`Stake entry with ID "${stakerId}" not found.`);
-  //   }
+  async approveChallenge(takerId: number): Promise<Taker> {
+    const take = await this.takerRepository.findOneBy({ id: takerId });
+    if (!take) {
+      throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
+    }
 
-  //   if (stake.status !== Status.PENDING) {
-  //     throw new BadRequestException(`Stake is already in status "${stake.status}" and cannot be approved.`);
-  //   }
+    if (take.status !== Status.PENDING) {
+      throw new BadRequestException(`take is already in status "${take.status}" and cannot be approved.`);
+    }
 
-  //   stake.status = Status.ACTIVE;
-  //   return this.stakerRepository.save(stake);
-  // }
+    take.status = Status.ACTIVE;
+    take.phase = 1;
+    return this.takerRepository.save(take);
+  }
 
   // async addReward(stakerId: number, addRewardDto: AddRewardDto): Promise<Staker> {
-  //   const stake = await this.stakerRepository.findOneBy({ id: stakerId });
+  //   const stake = await this.takerRepository.findOneBy({ id: stakerId });
   //   if (!stake) {
   //     throw new NotFoundException(`Stake entry with ID "${stakerId}" not found.`);
   //   }
@@ -125,35 +126,34 @@ export class ChallengeService {
   //   // return returnState!;
   // }
 
-  // async claimStake(stakerId: number, userId: number, claimStakeDto: ClaimStakeDto): Promise<Staker> {
-  //   // Find the specific stake entry
-  //   const stake = await this.stakerRepository.findOne({
-  //     where: { id: stakerId },
-  //     relations: ['user','staking'], // Ensure the user relation is loaded
-  //   });
+  async requestReview(takerId: number, userId: number, reviewDto: RequestReviewDto): Promise<String> {
+    // Find the specific stake entry
+    const take = await this.takerRepository.findOne({
+      where: { id: takerId },
+      relations: ['user','challenge'], // Ensure the user relation is loaded
+    });
 
-  //   if (!stake) {
-  //     throw new NotFoundException(`Stake entry with ID "${stakerId}" not found.`);
-  //   }
+    if (!take) {
+      throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
+    }
 
-  //   // Security check: Ensure the user owns this stake
-  //   if (stake.user.id !== userId) {
-  //     throw new UnauthorizedException('You do not have permission to claim this stake.');
-  //   }
+    // Security check: Ensure the user owns this stake
+    if (take.user.id !== userId) {
+      throw new UnauthorizedException('You do not have permission to claim this stake.');
+    }
 
-  //   // Business logic: A user can only claim an ACTIVE stake
-  //   if (stake.status !== Status.ACTIVE) {
-  //     throw new BadRequestException(`Only ACTIVE stakes can be claimed. Current status is "${stake.status}".`);
-  //   }
+    // Business logic: A user can only claim an ACTIVE stake
+    if (take.status !== Status.ACTIVE) {
+      throw new BadRequestException(`Only ACTIVE stakes can be claimed. Current status is "${take.status}".`);
+    }
+    take.status = Status.REVIEW;
 
-  //   // Update the stake's status and add the withdrawal address
-  //   stake.status = Status.CLOSED;
-  //   stake.withdrawalWallet = claimStakeDto.withdrawalWalletAddress;
+    
 
-  //   await this.mailService.sendClaimEmailAdmin(stake.user.fullName,stake.staking.stakeName)
+    await this.mailService.sendReviewRequestAdmin(take.user.fullName,take.challenge.amount,take.phase)
 
-  //   return this.stakerRepository.save(stake);
-  // }
+    return "your review request has been submitted;"
+  }
 
   // async approveClaim(stakerId: number): Promise<Staker> {
   //   try {

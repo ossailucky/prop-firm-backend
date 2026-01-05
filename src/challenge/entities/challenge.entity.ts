@@ -1,10 +1,13 @@
 import { User } from 'src/user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne } from 'typeorm';
 
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-}
+export enum Status {
+    PENDING = 'PENDING',
+    ACTIVE = 'ACTIVE', 
+    CLOSED = 'CLOSED',
+    REVIEW = "REVIEW"
+    
+  }
 
 @Entity('challenges')
 export class Challenge {
@@ -72,8 +75,12 @@ export class Taker {
     @ManyToOne(() => Challenge, challenge => challenge.takers,{ onDelete: 'CASCADE' })
     challenge: Challenge;
 
-    @Column({default: 'pending'})
-    status: string;
+    @Column({
+        type: 'enum',
+        enum: Status,
+        default: Status.PENDING,
+      })
+    status: Status;
 
     @Column()
     paymentMedium: string;

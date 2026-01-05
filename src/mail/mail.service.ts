@@ -136,7 +136,25 @@ export class MailService {
         amount,
       },
     });
-    console.log(`Stake confirmation submitted${process.env.ADMIN_EMAIL} .`);
+    console.log(`Challenge confirmation submitted${process.env.ADMIN_EMAIL} .`);
+  }
+
+  async sendReviewRequestAdmin(
+    username: string,
+    amount: number,
+    phase: number
+  ) {
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      subject: `A Challenge review for "${amount}" has been requested!`,
+      template: './review-alert',
+      context: {
+        username,
+        amount,
+        phase,
+      },
+    });
+    console.log(`Challenge review request submitted${process.env.ADMIN_EMAIL} .`);
   }
 
   

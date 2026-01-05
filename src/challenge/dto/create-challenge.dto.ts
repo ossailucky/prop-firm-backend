@@ -37,3 +37,9 @@ export class CreateChallengeDto {
     @IsOptional()
     minBenchmark?: string;
 }
+
+export class RequestReviewDto {
+
+    @IsNumber()
+    phase: number;
+}

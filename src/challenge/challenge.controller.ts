@@ -1,12 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, ParseIntPipe, Req, UploadedFile } from '@nestjs/common';
 import { ChallengeService } from './challenge.service';
-import { CreateChallengeDto } from './dto/create-challenge.dto';
+import { CreateChallengeDto, RequestReviewDto } from './dto/create-challenge.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { hasRoles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from 'src/user/entities/user.entity';
 
 @ApiTags("challenge")
 @Controller({version: "1", path: "challenge"})
@@ -49,6 +51,19 @@ export class ChallengeController {
     const paymentMedium = body.paymentMedium;
     
     return this.challengeService.addTaker(id, userId,paymentMedium,imageUrl);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  //@hasRoles(UserRole.ADMIN)
+  @Patch('/approve/:takerId')
+  approveChallenge(@Param('takerId', ParseIntPipe) takerId: number) {
+    return this.challengeService.approveChallenge(takerId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/request-review/:takerId')
+  requestReviewChallenge(@Param('takerId', ParseIntPipe) takerId: number, @Req() req, requestReviewDto: RequestReviewDto)  {
+    return this.challengeService.requestReview(takerId, req.user.id, requestReviewDto);
   }
 
   // @Get(':id')
