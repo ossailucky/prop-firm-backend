@@ -25,6 +25,10 @@ export class CreateUserDto {
   @IsString()
   gender: string;
 
+    @IsOptional()
+    @IsString()
+    referee : string;
+
 }
 
 export class ResetPasswordDto {

@@ -5,6 +5,7 @@ import { CreateChallengeDto, RequestReviewDto, TradingLoginDetailsDTO } from './
 import { UserService } from 'src/user/user.service';
 import { MailService } from 'src/mail/mail.service';
 import { Challenge, Status, Taker } from './entities/challenge.entity';
+import crypto from "crypto";
 
 @Injectable()
 export class ChallengeService {
@@ -44,7 +45,7 @@ export class ChallengeService {
   async addTaker(challengeId: number, userId: number,paymentMedium:string,image:string | null): Promise<Challenge> {
     const challenge = await this.challengeRepository.findOne({ where: { id: challengeId }, relations: ['takers'] });
     if (!challenge) {
-      throw new NotFoundException(`Staking with ID "${challengeId}" not found`);
+      throw new NotFoundException(`taking with ID "${challengeId}" not found`);
     }
     
     // Find the user who is making the request
@@ -53,6 +54,11 @@ export class ChallengeService {
       throw new NotFoundException('User not found.');
     }
 
+    if(user.isEmailVerified === false){
+      throw new BadRequestException('Your email is not verifield yet, please verify your email');
+    }
+
+  
     const newTaker = this.takerRepository.create({
       amount: challenge.amount,
       receiptUrl: image ?? '',
@@ -69,10 +75,10 @@ export class ChallengeService {
 
     await this.challengeRepository.save(challenge);
 
-    // await this.userService.addUserStaking(userId, staking);
+    
 
 
-    await this.mailService.sendStakeEmail(user.email,user.fullName,challenge.amount);
+   // await this.mailService.sendStakeEmail(user.email,user.fullName,challenge.amount);
     await this.mailService.sendStakeEmailAdmin(user.fullName,challenge.amount)
 
     // Refresh the staking entity to include the new staker
@@ -80,7 +86,7 @@ export class ChallengeService {
   }
 
   async approveChallenge(takerId: number): Promise<Taker> {
-    const take = await this.takerRepository.findOneBy({ id: takerId });
+    const take = await this.takerRepository.findOne({ where:{id: takerId}, relations: ['user']  } );
     if (!take) {
       throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
     }
@@ -91,6 +97,17 @@ export class ChallengeService {
 
     take.status = Status.ACTIVE;
     take.phase = 1;
+
+    const referee = await this.userService.findByrefferalCode(take.user.referralCode);
+
+    if(referee){
+      const bonusAmount = (take.fee * 10) / 100; // 10% of the challenge fee
+      await this.userService.increaseUserBalance(referee.id, bonusAmount);
+      await this.mailService.sendRefferralBonus(referee.email,referee.fullName,take.user.fullName,bonusAmount);
+
+      await this.userService.updateReferee(take.user.id);
+      return this.takerRepository.save(take);
+    }
     return this.takerRepository.save(take);
   }
 
@@ -176,7 +193,8 @@ export class ChallengeService {
         where: { id: takerId },
         relations: ['user','challenge'], // Ensure the user relation is loaded
       });
-      console.log(take);
+      
+         
       
       if (!take) {
         throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
@@ -201,6 +219,13 @@ export class ChallengeService {
       
     }
     
+  }
+
+  generateSecureCode(length = 6) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return Array.from(crypto.randomBytes(length))
+      .map(b => chars[b % chars.length])
+      .join("");
   }
 
   // async update(id: number, dto: UpdateStakingDto): Promise<Staking> {

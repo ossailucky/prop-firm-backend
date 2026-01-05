@@ -48,7 +48,11 @@ export class User {
   @Column({type: String, nullable: false})
   country: string;
 
-  
+  @Column({type: String, nullable: true,unique:true})
+  referralCode: string;
+
+@Column({type: String, nullable: true})
+  referee : string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default:0})
   accountBalance: number;

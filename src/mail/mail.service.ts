@@ -190,15 +190,15 @@ export class MailService {
      });
    }
 
-  async sendConnectWallet(userEmail: string, walletType:string, messageContent: string, adminName: string = 'Admin') {
+  async sendRefferralBonus(userEmail: string, userName:string, getterName: string, amount: number) {
     await this.mailerService.sendMail({
       to: userEmail,
-      subject: `Wallet from Connection`,
-      template: './connect-wallet',
+      subject: `Refferal Bonus`,
+      template: './refferal-bonus',
       context: {
-        walletType,
-        adminName,
-        messageContent,
+        userName,
+        getterName,
+        amount,
       },
     });
   }

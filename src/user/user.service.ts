@@ -8,6 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthDTO } from 'src/auth/dto/create-auth.dto';
+import crypto from "crypto";
+import { log } from 'console';
 
 @Injectable()
 export class UserService {
@@ -19,17 +21,25 @@ export class UserService {
     // private readonly notificationService: NotificationService
   ) {}
 
-  async create(userData: CreateUserDto): Promise<User> {
+  async create(userData: CreateUserDto): Promise<any> {
     try {
       const existingUser = await this.usersRepository.findOne({
         where: { email: userData.email },
       });
+      const refCode = this.generateCode(6);
+
+
+      console.log('Generated referral code:', refCode);
+      
   
       if (existingUser) {
         console.log('User with this email already exists:', existingUser.email);
         
         throw new ConflictException('User with this email already exists');
       }
+
+     
+      
 
       const tokenSign = this.jwtService.sign(
         { email: userData.email },
@@ -40,10 +50,11 @@ export class UserService {
       const user = this.usersRepository.create({
         ...userData,
         password: hashedPassword,
+        referralCode:refCode,
       });
     
-      const url = `${process.env.APP_URL}/verify-email?token=${tokenSign}`;
-      await this.mailService.verifyEmail(userData.email, url, userData.fullName);
+      // const url = `${process.env.APP_URL}/verify-email?token=${tokenSign}`;
+      // await this.mailService.verifyEmail(userData.email, url, userData.fullName);
 
 
       return this.usersRepository.save(user);
@@ -138,6 +149,10 @@ async resetPassword(dto: ResetPasswordDto, token:string) {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
+  }
+
+  async findByrefferalCode(code: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { referralCode:code } });
   }
 
   async findById(id: number): Promise<User> {
@@ -289,26 +304,42 @@ async resetPassword(dto: ResetPasswordDto, token:string) {
 // //   }
 
 
-// //   async increaseUserBalance(id: number,amount:number): Promise<User> {
-// //     try {
+  async increaseUserBalance(id: number,amount:number): Promise<User> {
+    try {
       
-// //       const user = await this.usersRepository.findOne({ 
-// //         where: { id }});
-// //       if (!user) {
-// //         throw new NotFoundException('User not found');
-// //       }
+      const user = await this.usersRepository.findOne({ 
+        where: { id }});
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
       
-// //       const newBalance = Number(user.accountBalance) + Number(amount);
+      const newBalance = Number(user.accountBalance) + Number(amount);
       
       
-// //       user.accountBalance = newBalance;
+      user.accountBalance = newBalance;
       
-// //       return await this.usersRepository.save(user);
-// //     } catch (error) {
-// //       throw error;
-// //     }
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw error;
+    }
    
-// //   }
+  }
+
+  async updateReferee(id: number): Promise<User> {
+    try {
+      const user = await this.usersRepository.findOne({ 
+        where: { id }});
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+  
+      user.referee = "";
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw error;
+      
+    }
+  }
 
   
 
@@ -357,4 +388,15 @@ async resetPassword(dto: ResetPasswordDto, token:string) {
 // //       throw new BadRequestException('Failed to send noftication');
 // //     }
 //   }
+
+generateCode(length = 6) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  return result;
+}
 }
