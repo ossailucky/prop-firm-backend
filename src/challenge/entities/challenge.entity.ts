@@ -63,11 +63,23 @@ export class Taker {
     @Column('decimal', { precision: 15, scale: 2, default: 0 })
     profit: number;
 
+    @Column('decimal', { precision: 15, scale: 2 })
+    fee: number;
+
     @Column({ nullable: true })
-    phase?: number;
+    phase: number;
   
     @ManyToOne(() => Challenge, challenge => challenge.takers,{ onDelete: 'CASCADE' })
     challenge: Challenge;
+
+    @Column({default: 'pending'})
+    status: string;
+
+    @Column()
+    paymentMedium: string;
+
+    @Column({ nullable: true })
+    receiptUrl?: string;
   
     // --- ADDED ---
     // Each taker entry is now linked to one user

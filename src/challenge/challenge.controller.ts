@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, ParseIntPipe, Req, UploadedFile } from '@nestjs/common';
 import { ChallengeService } from './challenge.service';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @ApiTags("challenge")
 @Controller({version: "1", path: "challenge"})
@@ -14,10 +18,38 @@ export class ChallengeController {
     return this.challengeService.create(createChallengeDto);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.challengeService.findAll();
-  // }
+  @Get()
+  findAll() {
+    return this.challengeService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/take-challenge')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/challenge/payments', // folder to save images
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+    }),
+  )
+  takeChallenge(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: any,
+    @Req() req, // Use the request object to get the user
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    
+    const userId = req.user.id; // Get user ID from the token payload
+    const imageUrl = file?.filename ? `uploads/challenge/payments/${file.filename}` : null;
+    const paymentMedium = body.paymentMedium;
+    
+    return this.challengeService.addTaker(id, userId,paymentMedium,imageUrl);
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

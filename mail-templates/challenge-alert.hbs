@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f7;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background-color: #3f51b5;
+      padding: 24px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 24px;
+    }
+    .content {
+      padding: 32px;
+      color: #333333;
+      text-align: center;
+    }
+    .content h2 {
+      color: #2c3e50;
+      font-size: 28px;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    .content p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .stake-details {
+      background-color: #f9f9f9;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .stake-details p {
+      margin: 8px 0;
+      font-size: 18px;
+      font-weight: bold;
+      color: #555555;
+    }
+    .cta-button {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .footer {
+      padding: 24px;
+      text-align: center;
+      color: #888888;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Sotremoptionstrade</h1>
+    </div>
+    <div class="content">
+      <h2>Stake Confirmation</h2>
+      <p>Hello {{stakerName}},</p>
+      <p>Thank you for Trading with FundedUp! Your request has been successfully submitted and is now pending approval from our team.</p>
+      
+      <div class="stake-details">
+        <p>You have subscribed the challenge: <strong>{{amount}}$</strong></p>
+      </div>
+      
+      <p>We will notify you once your stake has been reviewed and approved. You can view the status of your stake anytime by visiting your dashboard.</p>
+      
+      
+    </div>
+    <div class="footer">
+      <p>&copy; 2025 FundedUp. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

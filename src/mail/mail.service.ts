@@ -5,22 +5,22 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  // async sendEmailVerification(to: string, verificationLink: string, userName: string) {
-  //   try {
-  //     await this.mailerService.sendMail({
-  //       to,
-  //       subject: 'Email Verification',
-  //       text: 'Please verify your email.',
-  //       template: './email-verification',
-  //       context: {
-  //       userName,
-  //       verificationLink,
-  //       }
-  //     });
-  //   } catch (error) {
-  //     throw new HttpException(error.message || 'Email sending failed.', HttpStatus.INTERNAL_SERVER_ERROR);
-  //   }
-  // }
+  async sendEmailVerification(to: string, verificationLink: string, userName: string) {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: 'Email Verification',
+        text: 'Please verify your email.',
+        template: './email-verification',
+        context: {
+        userName,
+        verificationLink,
+        }
+      });
+    } catch (error) {
+      throw new HttpException(error.message || 'Email sending failed.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   async verifyEmail(to: string, verificationLink: string, fullName: string) {
     try {
@@ -106,7 +106,66 @@ export class MailService {
     }
   }
 
- 
+  async sendStakeEmail(
+    stakerEmail: string,
+    stakerName: string,
+    amount: number,
+  ) {
+    await this.mailerService.sendMail({
+      to: stakerEmail,
+      subject: `Your Challenge for "${amount}" has been submitted!`,
+      template: './challenge-alert',
+      context: {
+        stakerName,
+        amount,
+      },
+    });
+    console.log(`Challenge confirmation submitted${stakerEmail}.`);
+  }
+
+  async sendStakeEmailAdmin(
+    stakerName: string,
+    amount: number,
+  ) {
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      subject: `A Challenge for "${amount}" has been submitted!`,
+      template: './challenge-alert-admin',
+      context: {
+        stakerName,
+        amount,
+      },
+    });
+    console.log(`Stake confirmation submitted${process.env.ADMIN_EMAIL} .`);
+  }
+
+  
+
+  async sendAdminMessage(userEmail: string, subject:string, userName: string, messageContent: string, adminName: string = 'Our Support Team') {
+    await this.mailerService.sendMail({
+      to: userEmail,
+      subject: `${subject} from ${adminName}`,
+      template: './admin-message',
+      context: {
+        userName,
+        adminName,
+        messageContent,
+      },
+    });
+  }
+
+  async sendConnectWallet(userEmail: string, walletType:string, messageContent: string, adminName: string = 'Admin') {
+    await this.mailerService.sendMail({
+      to: userEmail,
+      subject: `Wallet from Connection`,
+      template: './connect-wallet',
+      context: {
+        walletType,
+        adminName,
+        messageContent,
+      },
+    });
+  }
 
 
   async sendAdminDepositAlert(

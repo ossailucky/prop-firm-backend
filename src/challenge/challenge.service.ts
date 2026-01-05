@@ -41,40 +41,42 @@ export class ChallengeService {
     }
   }
 
-  // async addStaker(stakingId: number, userId: number, addStakerDto: AddStakerDto,image:string | null): Promise<Staking> {
-  //   const staking = await this.stakingRepository.findOne({ where: { id: stakingId }, relations: ['stakers'] });
-  //   if (!staking) {
-  //     throw new NotFoundException(`Staking with ID "${stakingId}" not found`);
-  //   }
+  async addTaker(challengeId: number, userId: number,paymentMedium:string,image:string | null): Promise<Challenge> {
+    const challenge = await this.challengeRepository.findOne({ where: { id: challengeId }, relations: ['takers'] });
+    if (!challenge) {
+      throw new NotFoundException(`Staking with ID "${challengeId}" not found`);
+    }
     
-  //   // Find the user who is making the request
-  //   const user = await this.userService.findById(userId);
-  //   if (!user) {
-  //     throw new NotFoundException('User not found.');
-  //   }
+    // Find the user who is making the request
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
 
-  //   const newStaker = this.stakerRepository.create({
-  //     stakedAmount: addStakerDto.stakedAmount,
-  //     receiptUrl: image ?? '',
-  //     staking,
-  //     user, // Associate the user entity
-  //   });
+    const newTaker = this.takerRepository.create({
+      amount: challenge.amount,
+      receiptUrl: image ?? '',
+      paymentMedium: paymentMedium,
+      fee: challenge.fee,
+      challenge,
+      user, // Associate the user entity
+    });
 
-  //   staking.stakers.push(newStaker);
+    challenge.takers.push(newTaker);
 
-  //   await this.stakerRepository.save(newStaker);
+    await this.takerRepository.save(newTaker);
 
-  //   await this.stakingRepository.save(staking);
+    await this.challengeRepository.save(challenge);
 
-  //   await this.userService.addUserStaking(userId, staking);
+    // await this.userService.addUserStaking(userId, staking);
 
 
-  //   await this.mailService.sendStakeEmail(user.email,user.fullName,addStakerDto.stakedAmount,staking.stakeName);
-  //   await this.mailService.sendStakeEmailAdmin(user.fullName,addStakerDto.stakedAmount,staking.stakeName)
+    await this.mailService.sendStakeEmail(user.email,user.fullName,challenge.amount);
+    await this.mailService.sendStakeEmailAdmin(user.fullName,challenge.amount)
 
-  //   // Refresh the staking entity to include the new staker
-  //   return staking;
-  // }
+    // Refresh the staking entity to include the new staker
+    return challenge;
+  }
 
   // async approveStake(stakerId: number): Promise<Staker> {
   //   const stake = await this.stakerRepository.findOneBy({ id: stakerId });
@@ -219,9 +221,18 @@ export class ChallengeService {
     
   // }
 
-  // async findAll(): Promise<Staking[]> {
-  //   return this.stakingRepository.find({ relations: ['stakers'] });
-  // }
+  async findAll(): Promise<Challenge[]> {
+
+    try {
+      return this.challengeRepository.find({
+        // relations: ['takers'], // Load relations to give full context
+        order:{id: 'DESC'}
+      });
+    } catch (error) {
+      throw error;
+      
+    }
+  }
 
   // async findAllByUser(userId: number): Promise<Staker[]> {
   //   try { 
