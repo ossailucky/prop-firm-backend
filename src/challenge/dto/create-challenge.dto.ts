@@ -43,3 +43,15 @@ export class RequestReviewDto {
     @IsNumber()
     phase: number;
 }
+
+export class TradingLoginDetailsDTO {
+    
+    @IsString()
+    serverName: string;
+
+    @IsString()
+    loginID: string;
+
+    @IsString()
+    password: string;
+}

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateChallengeDto, RequestReviewDto } from './dto/create-challenge.dto';
+import { CreateChallengeDto, RequestReviewDto, TradingLoginDetailsDTO } from './dto/create-challenge.dto';
 import { UserService } from 'src/user/user.service';
 import { MailService } from 'src/mail/mail.service';
 import { Challenge, Status, Taker } from './entities/challenge.entity';
@@ -59,6 +59,7 @@ export class ChallengeService {
       paymentMedium: paymentMedium,
       fee: challenge.fee,
       challenge,
+      phase: 1,
       user, // Associate the user entity
     });
 
@@ -146,42 +147,61 @@ export class ChallengeService {
     if (take.status !== Status.ACTIVE) {
       throw new BadRequestException(`Only ACTIVE stakes can be claimed. Current status is "${take.status}".`);
     }
+
     take.status = Status.REVIEW;
 
-    
+    await this.takerRepository.save(take);
 
     await this.mailService.sendReviewRequestAdmin(take.user.fullName,take.challenge.amount,take.phase)
 
     return "your review request has been submitted;"
   }
 
-  // async approveClaim(stakerId: number): Promise<Staker> {
-  //   try {
-  //     const stake = await this.stakerRepository.findOne({
-  //       where: { id: stakerId },
-  //       relations: ['user','staking'], // Ensure the user relation is loaded
-  //     });
-  //     if (!stake) {
-  //       throw new NotFoundException(`Stake entry with ID "${stakerId}" not found.`);
-  //     }
+  async sendTradingLoginByEmail(takerId: number, dto:TradingLoginDetailsDTO): Promise<any> {
+    try {
+      const { serverName, loginID,  password} = dto;
+      const taker = await this.takerRepository.findOne({ where: { id: takerId },relations: ['user','challenge'], });
+      if (!taker) throw new NotFoundException('Challenge not found');
+
+      await this.mailService.tradingDetailsMessage(taker.user.email, taker.user.fullName,loginID, password, serverName);
+      return { message: 'Login Details sent successfully' };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async confirmPhase(takerId: number): Promise<Taker> {
+    try {
+      const take = await this.takerRepository.findOne({
+        where: { id: takerId },
+        relations: ['user','challenge'], // Ensure the user relation is loaded
+      });
+      console.log(take);
+      
+      if (!take) {
+        throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
+      }
   
-  //     // Admin can only approve stakes that are in the CLOSED (withdrawal requested) state
-  //     if (stake.status !== Status.CLOSED) {
-  //       throw new BadRequestException(`Only stakes with status CLOSED can be approved. Current status is "${stake.status}".`);
-  //     }
+      // Admin can only approve stakes that are in the CLOSED (withdrawal requested) state
+      if (take.status !== Status.REVIEW) {
+        throw new BadRequestException(`Only challenges with status REVIEW can be updated. Current status is "${take.status}".`);
+      }
   
-  //     stake.status = Status.COMPLETED;
+      take.status = Status.ACTIVE;
       
-  //     const amountToCredit = Number(stake.stakedAmount) + Number(stake.rewards);
-  //     await this.mailService.sendUserClaimApproved(stake.user.email,stake.user.fullName,amountToCredit,stake.staking.stakeName,stake.status);
+      take.phase = take.phase + 1;
+
+      const message = `Congratulations! You have successfully completed Phase " ${take.phase -1}   of your challenge. Get ready for Phase ${take.phase}. Keep up the great work!`;
       
-  //     return this.stakerRepository.save(stake);
-  //   } catch (error) {
-  //     throw error;
+      await this.mailService.confirmChallengePhase(take.user.email,take.user.fullName,message);
       
-  //   }
+      return this.takerRepository.save(take);
+    } catch (error) {
+      throw error;
+      
+    }
     
-  // }
+  }
 
   // async update(id: number, dto: UpdateStakingDto): Promise<Staking> {
   //   const staking = await this.stakingRepository.findOneBy({ id });

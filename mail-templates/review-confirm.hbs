@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #6c757d; } /* Grey */
+        p { line-height: 1.6; }
+        .message-box { background-color: #f8f9fa; border: 1px solid #e9ecef; padding: 15px; border-radius: 5px; margin-top: 20px; margin-bottom: 20px; }
+        .footer { margin-top: 30px; font-size: 0.9em; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Important Message from Fundeup Team</h1>
+        <p>Hello {{username}},</p>
+        <p>You have received a message from Fundedup team:</p>
+
+        <div class="message-box">
+            <p>{{messageContent}}</p>
+        </div>
+
+        <p>reply to this email (if applicable) for further action or details.</p>
+        <p>Regards,<br>Fundedup</p>
+    </div>
+    
+</body>
+</html>

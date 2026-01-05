@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { log } from 'console';
 
 @Injectable()
 export class MailService {
@@ -159,18 +160,35 @@ export class MailService {
 
   
 
-  async sendAdminMessage(userEmail: string, subject:string, userName: string, messageContent: string, adminName: string = 'Our Support Team') {
+  async tradingDetailsMessage(userEmail: string, firstName:string, accountId: string, password: string, serverName: string) {
+   const supportEmail = process.env.ADMIN_EMAIL;
+   
     await this.mailerService.sendMail({
       to: userEmail,
-      subject: `${subject} from ${adminName}`,
-      template: './admin-message',
+      subject: `Trading Account Creditial`,
+      template: './send-trading-acct',
       context: {
-        userName,
-        adminName,
-        messageContent,
+        firstName,
+        accountId,
+        password,
+        serverName,
+        supportEmail
       },
     });
   }
+
+  async confirmChallengePhase(userEmail: string, username:string, messageContent: string) {
+    
+     await this.mailerService.sendMail({
+       to: userEmail,
+       subject: `Review Result Confirmation`,
+       template: './review-confirm',
+       context: {
+         username,
+         messageContent,
+       },
+     });
+   }
 
   async sendConnectWallet(userEmail: string, walletType:string, messageContent: string, adminName: string = 'Admin') {
     await this.mailerService.sendMail({
