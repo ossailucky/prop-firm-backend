@@ -1,4 +1,5 @@
 import { Challenge, Taker } from 'src/challenge/entities/challenge.entity';
+import { Payment } from 'src/payment/entities/payment.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 
 export enum UserRole {
@@ -64,8 +65,8 @@ export class User {
 //   @OneToMany(() => Deposit, (deposit) => deposit.user)
 //   deposits: Deposit[];
 
-//   @OneToMany(() => Withdraw, (withdrawal) => withdrawal.user)
-//   payouts: Withdraw[];
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments: Payment[];
 
 //   @OneToMany(() => Notification, (notification) => notification.recipient)
 //   notifications: Notification[];

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #ffc107; } /* Orange/Yellow */
+        p { line-height: 1.6; }
+        .details-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .details-table th, .details-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .details-table th { background-color: #f2f2f2; }
+        .button {
+            display: inline-block;
+            background-color: #ffc107;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .footer { margin-top: 30px; font-size: 0.9em; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>New Withdrawal Request Alert</h1>
+        <p>Hello Admin,</p>
+        <p>A new withdrawal request has been submitted and requires your approval.</p>
+
+        <table class="details-table">
+            <tr>
+                <th>User</th>
+                <td>{{userName}}</td>
+            </tr>
+            <tr>
+                <th>Amount</th>
+                <td>${{amount}}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{status}}</td>
+            </tr>
+        </table>
+
+        <p>Please log in to the admin panel to review and approve this withdrawal:</p>
+        <p>Regards,<br>Your Automated System</p>
+    </div>
+    <div class="footer">
+        This is an automated email. Please do not reply.
+    </div>
+</body>
+</html>

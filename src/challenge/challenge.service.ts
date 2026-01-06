@@ -204,6 +204,12 @@ export class ChallengeService {
       if (take.status !== Status.REVIEW) {
         throw new BadRequestException(`Only challenges with status REVIEW can be updated. Current status is "${take.status}".`);
       }
+
+      if(take.phase >=3){
+        take.status = Status.COMPLETED;
+        await this.mailService.challengeCompleted(take.user.email,take.user.fullName,take.amount,take.phase,take.profit,'COMPLETED');
+        return this.takerRepository.save(take);
+      }
   
       take.status = Status.ACTIVE;
       
@@ -306,13 +312,13 @@ export class ChallengeService {
   //   return staking;
   // }
 
-  // async findStake(id: number): Promise<Staker> {
-  //   const stake = await this.stakerRepository.findOne({ where: { id }, relations: ['staking','user'] });
-  //   if (!stake) {
-  //     throw new NotFoundException(`Staking with ID "${id}" not found`);
-  //   }
-  //   return stake;
-  // }
+  async findTake(id: number): Promise<Taker> {
+    const take = await this.takerRepository.findOne({ where: { id }, relations: ['challenge','user'] });
+    if (!take) {
+      throw new NotFoundException(`taking with ID "${id}" not found`);
+    }
+    return take;
+  }
 
 
   // async remove(id: number): Promise<void> {

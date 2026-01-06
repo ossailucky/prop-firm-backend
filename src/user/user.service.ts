@@ -268,28 +268,17 @@ async resetPassword(dto: ResetPasswordDto, token:string) {
     
 // //   }
 
-// //   async addUserWithdraw(userId: number, withdrawObject: object) {
-// //     const user = await this.usersRepository.findOne({ where:{id: userId }, relations: ['withdrawals']});
+  async addUserPayment(userId: number, paymentObject: object) {
+    const user = await this.usersRepository.findOne({ where:{id: userId }, relations: ['payments']});
 
-// //     if (!user) throw new Error('User not found');
+    if (!user) throw new Error('User not found');
 
-// //     user.withdrawals.push(withdrawObject as any);
-// //     return await this.usersRepository.save(user);
-// //   }
+    user.payments.push(paymentObject as any);
+    return await this.usersRepository.save(user);
+  }
 
-// //   async addUserNFT(userId: number, nftObject: object) {
-// //     try {
-// //       const user = await this.usersRepository.findOne({ where:{id: userId }, relations: ['ownednfts']});
-
-// //     if (!user) throw new Error('User not found');
-
-// //     user.ownednfts.push(nftObject as any);
-// //     return await this.usersRepository.save(user);
-// //     } catch (error) {
-// //       throw error;
-      
-// //     }
-// //   }
+  
+  
 
 // //   async removeUserNFT(userId: number, nftId: number) {
 // //     try {
@@ -343,23 +332,23 @@ async resetPassword(dto: ResetPasswordDto, token:string) {
 
   
 
-// //   async decreaseUserBalance(id: number,amount:number): Promise<User> {
-// //     try {
-// //       const user = await this.usersRepository.findOne({ 
-// //         where: { id }});
-// //       if (!user) {
-// //         throw new NotFoundException('User not found');
-// //       }
+  async decreaseUserBalance(id: number,amount:number): Promise<User> {
+    try {
+      const user = await this.usersRepository.findOne({ 
+        where: { id }});
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
   
-// //       const newBalance = Number(user.accountBalance) - Number(amount);
-// //       user.accountBalance = newBalance;
-// //       return await this.usersRepository.save(user);
-// //     } catch (error) {
-// //       throw error;
+      const newBalance = Number(user.accountBalance) - Number(amount);
+      user.accountBalance = newBalance;
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw error;
       
-// //     }
+    }
     
-// //   }
+  }
 
 // //   async messageUserByEmail(id: number, dto:CreateMessageDto): Promise<any> {
 // //     try {

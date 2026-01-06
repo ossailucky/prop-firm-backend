@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #ffc107; } /* Orange/Yellow */
+        p { line-height: 1.6; }
+        .details-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .details-table th, .details-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .details-table th { background-color: #f2f2f2; }
+        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 5px; font-weight: bold; color: #fff; }
+        .status-pending { background-color: #ffc107; }
+        .status-completed { background-color: #28a745; }
+        .status-failed { background-color: #dc3545; }
+        .footer { margin-top: 30px; font-size: 0.9em; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Withdrawal Confirmation</h1>
+        <p>Hello {{userName}},</p>
+        <p>Your withdrawal request has been received and is currently <span class="status-badge status-{{status}}">{{status}}</span>.</p>
+
+        <table class="details-table">
+            <tr>
+                <th>Amount</th>
+                <td>{{amount}} {{withdrawalMethod}}</td>
+            </tr>
+            <tr>
+                <th>Recipient Details </th>
+                <td>{{withdrawalMethod}}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td><span class="status-badge status-{{status}}">{{status}}</span></td>
+            </tr>
+        </table>
+
+        <p>Withdrawals usually take up to 24 hours to process, depending on network congestion.</p>
+        <p>We will send another notification once the transaction is completed.</p>
+        <p>Regards,<br>Your Team</p>
+    </div>
+    <div class="footer">
+        This is an automated email. Please do not reply.
+    </div>
+</body>
+</html>

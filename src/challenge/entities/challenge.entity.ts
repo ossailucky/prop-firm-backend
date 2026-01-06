@@ -5,7 +5,9 @@ export enum Status {
     PENDING = 'PENDING',
     ACTIVE = 'ACTIVE', 
     CLOSED = 'CLOSED',
-    REVIEW = "REVIEW"
+    REVIEW = "REVIEW",
+    COMPLETED = "COMPLETED",
+    WITHDRAWN = "WITHDRAWN"
     
   }
 

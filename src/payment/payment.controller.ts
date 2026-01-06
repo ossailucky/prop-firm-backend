@@ -1,30 +1,64 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from 'src/user/entities/user.entity';
+import { hasRoles } from 'src/auth/decorators/roles.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('payment')
+@ApiTags("payments")
+@Controller({version: "1", path: "payments"})
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentService.create(createPaymentDto);
+  @UseGuards(JwtAuthGuard)
+  @Post("create/:takerId")
+  request(@Param('takerId', ParseIntPipe) takerId: number, @Req() req, @Body() dto: CreatePaymentDto) {
+    return this.paymentService.requestWithdrawal(req.user.id, takerId, dto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
+  list(@Req() req) {
+    return this.paymentService.getUserWithdrawals(req.user.id);
+  }
+
+
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Patch(':id/approve')
+  approve(@Param('id') id: number) {
+    return this.paymentService.approveWithdrawal(id);
+  }
+
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Patch(':id/reject')
+  reject(@Param('id') id: number) {
+    return this.paymentService.rejectWithdrawal(id);
+  }
+
+  
+
+
+
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Get("all")
   findAll() {
     return this.paymentService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.paymentService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
+  @Get('user/:userId')
+  findByUser(@Param('userId') userId: number) {
+    return this.paymentService.findByUser(userId);
   }
 
   @Delete(':id')

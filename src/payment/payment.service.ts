@@ -1,26 +1,200 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { Payment, PaymentStatus } from './entities/payment.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserService } from 'src/user/user.service';
+import { MailService } from 'src/mail/mail.service';
+import { ChallengeService } from 'src/challenge/challenge.service';
+import { Status } from 'src/challenge/entities/challenge.entity';
 
 @Injectable()
 export class PaymentService {
-  create(createPaymentDto: CreatePaymentDto) {
-    return 'This action adds a new payment';
+  constructor(
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
+    private readonly userService: UserService,
+    private readonly mailService: MailService,
+    private readonly challengeService: ChallengeService,
+    //private readonly notificationService: NotificationService
+
+  ) {}
+
+  async requestWithdrawal(userId: number, takerId: number, dto: CreatePaymentDto) {
+    try {
+      const user = await this.userService.findById(userId);
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const taker = await this.challengeService.findTake(takerId);
+
+    if(!taker || taker.user.id !== userId) {
+      throw new BadRequestException('Invalid taker ID');
+    }
+
+    if (taker.status === Status.WITHDRAWN) {
+      throw new BadRequestException(
+        'Funds already withdrawn for this challenge.',
+      );
+    }
+    
+    const challengeCompleted =
+      taker.status === Status.COMPLETED && taker.phase === 3;
+    
+    // if (!challengeCompleted) {
+    //   throw new BadRequestException(
+    //     'Challenge not completed. Withdrawal not allowed.',
+    //   );
+    // }
+
+
+
+    const withdrawal = this.paymentRepository.create({
+      user,
+      amount: taker.amount,
+      method: dto.method,
+      cryptoAddress: dto.cryptoAddress,
+      bankName: dto.bankName,
+      accountName: dto.accountName,
+      accountNumber: dto.accountNumber,
+      challenge: taker,
+    });
+
+
+    const add = await this.userService.addUserPayment(userId, withdrawal);
+
+    if (!add) {
+      throw new BadRequestException('Issue creating withdrawal.');
+    }
+
+    await this.mailService.sendWithdrawalConfirmation(user.email, user.fullName, taker.amount, PaymentStatus.PENDING,dto.method);
+    await this.mailService.sendAdminWithdrawalAlert(user.fullName, taker.amount, PaymentStatus.PENDING)
+
+    
+    return this.paymentRepository.save(withdrawal);
+    } catch (error) {
+      throw error;
+    }
+    
   }
 
-  findAll() {
-    return `This action returns all payment`;
+  async getUserWithdrawals(userId: number) {
+    return this.paymentRepository.find({
+      where: { user: { id: userId } },
+      order: { createdAt: 'DESC' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
+  async approveWithdrawal(id: number) {
+    try {
+      const withdrawal = await this.paymentRepository.findOne({ where: { id },relations: ['user'] });
+    if (!withdrawal) throw new NotFoundException('Withdrawal not found');
+
+
+    if( withdrawal.status === PaymentStatus.APPROVED || withdrawal.status === PaymentStatus.REJECTED) {
+      throw new BadRequestException('Payment already processed');
+    }
+    
+    withdrawal.status = PaymentStatus.APPROVED;
+
+    await this.userService.decreaseUserBalance(withdrawal.user.id, withdrawal.amount);
+
+    
+    await this.mailService.sendUserWithdrawalApproved(withdrawal.user.email, withdrawal.user.fullName, withdrawal.amount, PaymentStatus.APPROVED, withdrawal.method);
+
+    
+    return this.paymentRepository.save(withdrawal);
+    } catch (error) {
+      throw error;
+    }
+    
   }
 
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
+  async rejectWithdrawal(id: number) {
+    const withdrawal = await this.paymentRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!withdrawal) throw new NotFoundException('Withdrawal not found');
+
+    if( withdrawal.status === PaymentStatus.APPROVED || withdrawal.status === PaymentStatus.REJECTED) {
+      throw new BadRequestException('payment already processed');
+    }
+
+    withdrawal.status = PaymentStatus.REJECTED;
+
+  
+    return this.paymentRepository.save(withdrawal);
   }
+
+  
+
+  async findAll(): Promise<Payment[]> {
+    try {
+      const deposits = await this.paymentRepository.find({
+        relations: ['user'],
+      });
+      if (!deposits || deposits.length === 0) {
+        throw new BadRequestException('No deposits found.');
+      }
+      return deposits;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findOne(id: number): Promise<Payment> {
+    try {
+      const withdraw = await this.paymentRepository.findOne({
+        where: { id },
+        relations: ['user'],
+      });
+      if (!withdraw) {
+        throw new NotFoundException('Withdraw not found');
+      }
+      return withdraw;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findByUser(
+        userId: number,
+        page = 1,
+        limit = 10,
+      ): Promise<{ data: Payment[]; total: number }> {
+        const [data, total] = await this.paymentRepository.findAndCount({
+          where: {
+            user: { id: userId },
+          },
+          order: { createdAt: 'DESC' },
+          skip: (page - 1) * limit,
+          take: limit,
+        });
+      
+        return { data, total };
+      }
+
+  async getAll(): Promise<Payment[]> {
+    try {
+      const withdraws = await this.paymentRepository.find({
+        relations: ['user'],
+      });
+      if (!withdraws || withdraws.length === 0) {
+        throw new BadRequestException('No withdrawals found.');
+      }
+      return withdraws;
+    } catch (error) {
+      throw error;
+    }
+  }
+  // update(id: number, updateWithdrawDto: UpdateWithdrawDto) {
+  //   return `This action updates a #${id} withdraw`;
+  // }
 
   remove(id: number) {
-    return `This action removes a #${id} payment`;
+    return `This action removes a #${id} withdraw`;
   }
 }

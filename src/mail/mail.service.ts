@@ -158,6 +158,32 @@ export class MailService {
     console.log(`Challenge review request submitted${process.env.ADMIN_EMAIL} .`);
   }
 
+  async challengeCompleted(
+    userEmail: string,
+    username: string,
+    amount: number,
+    phase: number,
+    profit: number,
+    status: string,
+  ) {
+    const supportEmail = process.env.ADMIN_EMAIL;
+    await this.mailerService.sendMail({
+      to: userEmail,
+      subject: `A Challenge review for "${amount}" has been requested!`,
+      template: './review-alert',
+      context: {
+        username,
+        amount,
+        phase,
+        profit,
+        status,
+        supportEmail
+
+      },
+    });
+    console.log(`Challenge review request submitted${process.env.ADMIN_EMAIL} .`);
+  }
+
   
 
   async tradingDetailsMessage(userEmail: string, firstName:string, accountId: string, password: string, serverName: string) {

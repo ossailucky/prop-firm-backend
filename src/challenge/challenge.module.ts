@@ -14,5 +14,6 @@ import { MailModule } from 'src/mail/mail.module';
   ],
   controllers: [ChallengeController],
   providers: [ChallengeService],
+  exports: [ChallengeService],
 })
 export class ChallengeModule {}

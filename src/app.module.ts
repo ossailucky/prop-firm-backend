@@ -13,6 +13,9 @@ import { MailModule } from './mail/mail.module';
 import { ChallengeModule } from './challenge/challenge.module';
 import { PaymentModule } from './payment/payment.module';
 import { Challenge, Taker } from './challenge/entities/challenge.entity';
+import { SettingModule } from './setting/setting.module';
+import { Payment } from './payment/entities/payment.entity';
+import { Setting } from './setting/entities/setting.entity';
 
 
 
@@ -36,7 +39,7 @@ Handlebars.registerHelper('toLowerCase', function (str) {
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ User, Challenge, Taker ],
+      entities: [ User, Challenge, Taker, Payment, Setting ],
       synchronize: true, // Set to false in production
       logging: true,
     }),
@@ -49,7 +52,8 @@ Handlebars.registerHelper('toLowerCase', function (str) {
     UserModule,
     MailModule,
     ChallengeModule,
-    PaymentModule],
+    PaymentModule,
+    SettingModule],
   controllers: [AppController],
   providers: [AppService],
 })
