@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Patch, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthDTO, UserVerifyeDTO } from './dto/create-auth.dto';
 import { Response } from 'express';
 import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { JwtAuthGuard } from './guards/jwt-guard';
 
 ApiTags("auth")
 @Controller({version: "1", path: "auth"})
@@ -39,4 +40,9 @@ export class AuthController {
     return this.userService.verifyEmail(token);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getProfile(@Req() req) {
+    return req.user; // user payload injected by JwtStrategy
+  }
 }
