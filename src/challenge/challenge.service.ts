@@ -44,6 +44,20 @@ export class ChallengeService {
 
   async addTaker(challengeId: number, userId: number,paymentMedium:string,image:string | null): Promise<Challenge> {
     const challenge = await this.challengeRepository.findOne({ where: { id: challengeId }, relations: ['takers'] });
+
+    const active = await this.takerRepository.find({
+      where: {
+        user: { id: userId }, 
+        status: Status.PENDING || Status.ACTIVE || Status.REVIEW,
+        
+       },
+      relations: ['user', 'challenge'], // Load relations to give full context
+    });
+
+    if(active.length > 0){
+      throw new BadRequestException('You have an ongoing challenge, you cannot take another challenge at the moment');
+    }
+    
     if (!challenge) {
       throw new NotFoundException(`taking with ID "${challengeId}" not found`);
     }
