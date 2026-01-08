@@ -246,31 +246,48 @@ export class ChallengeService {
   // }
  
 
-  // async findStakersByStatus(status: Status): Promise<Staker[]> {
-  //   try {
-  //     return this.stakerRepository.find({
-  //       where: { status },
-  //       relations: ['user', 'staking'], // Load relations to give full context
-  //     });
-  //   } catch (error) {
-  //     throw error;
+  async findTakersByStatus(status: Status): Promise<Taker[]> {
+    try {
+      return this.takerRepository.find({
+        where: { status },
+        relations: ['user', 'challenge'], // Load relations to give full context
+      });
+    } catch (error) {
+      throw error;
       
-  //   }
+    }
     
-  // }
+  }
 
-  // async findStakers(): Promise<Staker[]> {
-  //   try {
-  //     return this.stakerRepository.find({
-  //       relations: ['user', 'staking'], // Load relations to give full context
-  //       order:{id: 'DESC'}
-  //     });
-  //   } catch (error) {
-  //     throw error;
+  async findOneTakerByStatus(userId: number): Promise<Taker[]> {
+    try {
+      return this.takerRepository.find({
+        where: {
+          user: { id: userId }, 
+          status: Status.ACTIVE,
+          
+         },
+        relations: ['user', 'challenge'], // Load relations to give full context
+      });
+    } catch (error) {
+      throw error;
       
-  //   }
+    }
     
-  // }
+  }
+
+  async findTakers(): Promise<Taker[]> {
+    try {
+      return this.takerRepository.find({
+        relations: ['user', 'challenge'], // Load relations to give full context
+        order:{id: 'DESC'}
+      });
+    } catch (error) {
+      throw error;
+      
+    }
+    
+  }
 
   async findAll(): Promise<Challenge[]> {
 
@@ -285,24 +302,24 @@ export class ChallengeService {
     }
   }
 
-  // async findAllByUser(userId: number): Promise<Staker[]> {
-  //   try { 
-  //     const stakes = this.stakerRepository.find({ 
-  //       where: {
-  //         user: { id: userId },
-  //       },
-  //       relations: ['staking', 'user'] });
+  async findAllByUser(userId: number): Promise<Taker[]> {
+    try { 
+      const stakes = this.takerRepository.find({ 
+        where: {
+          user: { id: userId },
+        },
+        relations: ['challenge', 'user'] });
 
-  //       if (!stakes) {
-  //         throw new NotFoundException(`No stakes found for user with ID "${userId}"`);
-  //       }
-  //       return stakes; 
-  //   } catch (error) {
-  //     throw error;
+        if (!stakes) {
+          throw new NotFoundException(`No takes found for user with ID "${userId}"`);
+        }
+        return stakes; 
+    } catch (error) {
+      throw error;
       
-  //   }
+    }
     
-  // }
+  }
 
   // async findOne(id: number): Promise<Staking> {
   //   const staking = await this.stakingRepository.findOne({ where: { id }, relations: ['stakers'] });

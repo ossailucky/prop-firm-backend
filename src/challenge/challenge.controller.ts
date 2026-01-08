@@ -62,6 +62,12 @@ export class ChallengeController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/active')
+  getActiveeChallenge(@Req() req) {
+    return this.challengeService.approveChallenge(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('/request-review/:takerId')
   requestReviewChallenge(@Param('takerId', ParseIntPipe) takerId: number, @Req() req, @Body() requestReviewDto: RequestReviewDto)  {
     return this.challengeService.requestReview(takerId, req.user.id, requestReviewDto);
@@ -80,6 +86,8 @@ export class ChallengeController {
   confirmChallengePhase(@Param('takerId', ParseIntPipe) takerId: number) {
     return this.challengeService.confirmPhase(takerId);
   }
+
+
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {
