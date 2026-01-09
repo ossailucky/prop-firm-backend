@@ -1,4 +1,4 @@
-import { Challenge, Taker } from 'src/challenge/entities/challenge.entity';
+import { Challenge, Taker, TradingLoginDetails } from 'src/challenge/entities/challenge.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 
@@ -67,6 +67,9 @@ export class User {
 
   @OneToMany(() => Payment, (payment) => payment.user)
   payments: Payment[];
+
+  @OneToMany(() => TradingLoginDetails, tradingDetails => tradingDetails.user)
+    tradingDetail: TradingLoginDetails;
 
 //   @OneToMany(() => Notification, (notification) => notification.recipient)
 //   notifications: Notification[];

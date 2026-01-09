@@ -95,10 +95,11 @@ export class ChallengeController {
 
 
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.challengeService.findOne(+id);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get("/trading-account")
+  findOne(@Req() req,) {
+    return this.challengeService.getTradingDetails(req.user.id);
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateChallengeDto: UpdateChallengeDto) {

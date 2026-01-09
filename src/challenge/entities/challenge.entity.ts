@@ -100,3 +100,21 @@ export class Taker {
     user: User;
   }
 
+  @Entity()
+    export class TradingLoginDetails {
+        @PrimaryGeneratedColumn()
+        id: number;
+        
+        @Column()
+        serverName: string;
+        
+        @Column()
+        loginID: string;
+        
+        @Column()
+        password: string;
+        
+        @ManyToOne(() => User, user => user.tradingDetail, { onDelete: 'CASCADE' })
+        user: User;
+    }
+

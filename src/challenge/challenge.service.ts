@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateChallengeDto, RequestReviewDto, TradingLoginDetailsDTO } from './dto/create-challenge.dto';
 import { UserService } from 'src/user/user.service';
 import { MailService } from 'src/mail/mail.service';
-import { Challenge, Status, Taker } from './entities/challenge.entity';
+import { Challenge, Status, Taker, TradingLoginDetails } from './entities/challenge.entity';
 import crypto from "crypto";
 
 @Injectable()
@@ -14,6 +14,8 @@ export class ChallengeService {
     private readonly challengeRepository: Repository<Challenge>,
     @InjectRepository(Taker)
     private readonly takerRepository: Repository<Taker>,
+    @InjectRepository(TradingLoginDetails)
+    private readonly tradingRepository: Repository<TradingLoginDetails>,
     private readonly userService: UserService,
     private readonly mailService: MailService,
   ) {}
@@ -194,8 +196,32 @@ export class ChallengeService {
       const taker = await this.takerRepository.findOne({ where: { id: takerId },relations: ['user','challenge'], });
       if (!taker) throw new NotFoundException('Challenge not found');
 
+     const tradingDetails = await this.tradingRepository.create({
+        serverName: serverName,
+        loginID: loginID,
+        password: password,
+        user:taker.user,
+      })
+
+       await this.tradingRepository.save(tradingDetails);
       await this.mailService.tradingDetailsMessage(taker.user.email, taker.user.fullName,loginID, password, serverName);
       return { message: 'Login Details sent successfully' };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  async getTradingDetails(userId:number): Promise<any>{
+    try {
+      const details = this.tradingRepository.findOne({ 
+        where: {
+          user: { id: userId },
+        },
+        relations: [ 'user'] });
+
+        if (!details) throw new NotFoundException('Trading details not found');
+        return details;
     } catch (error) {
       throw error;
     }
