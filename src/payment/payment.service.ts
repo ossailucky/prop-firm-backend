@@ -88,7 +88,7 @@ export class PaymentService {
 
   async approveWithdrawal(id: number) {
     try {
-      const withdrawal = await this.paymentRepository.findOne({ where: { id },relations: ['user'] });
+      const withdrawal = await this.paymentRepository.findOne({ where: { id },relations: ['user', "challenge"] });
     if (!withdrawal) throw new NotFoundException('Withdrawal not found');
 
 
@@ -103,6 +103,7 @@ export class PaymentService {
     
     await this.mailService.sendUserWithdrawalApproved(withdrawal.user.email, withdrawal.user.fullName, withdrawal.amount, PaymentStatus.APPROVED, withdrawal.method);
 
+    await this.challengeService.updateStatus(withdrawal.challenge.id);
     
     return this.paymentRepository.save(withdrawal);
     } catch (error) {

@@ -16,6 +16,7 @@ import { Challenge, Taker } from './challenge/entities/challenge.entity';
 import { SettingModule } from './setting/setting.module';
 import { Payment } from './payment/entities/payment.entity';
 import { Setting } from './setting/entities/setting.entity';
+import { TradingModule } from './trading/trading.module';
 
 
 
@@ -53,7 +54,8 @@ Handlebars.registerHelper('toLowerCase', function (str) {
     MailModule,
     ChallengeModule,
     PaymentModule,
-    SettingModule],
+    SettingModule,
+    TradingModule],
   controllers: [AppController],
   providers: [AppService],
 })

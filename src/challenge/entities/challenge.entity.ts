@@ -1,3 +1,4 @@
+import { Payment } from 'src/payment/entities/payment.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne } from 'typeorm';
 
@@ -86,6 +87,9 @@ export class Taker {
 
     @Column()
     paymentMedium: string;
+
+    @ManyToOne(() => Payment, pay => pay.challenge, { onDelete: 'SET NULL' })
+    payment: Payment;
 
     @Column({ nullable: true })
     receiptUrl?: string;

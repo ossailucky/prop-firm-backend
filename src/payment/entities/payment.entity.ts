@@ -52,7 +52,7 @@ export class Payment {
   })
   status: PaymentStatus;
 
-  @ManyToOne(() => Taker)
+  @ManyToOne(() => Taker, (challenge) => challenge.payment)
   challenge: Taker;
 
   @CreateDateColumn()

@@ -63,8 +63,14 @@ export class ChallengeController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/active')
-  getActiveeChallenge(@Req() req) {
-    return this.challengeService.approveChallenge(req.user.id);
+  getActiveChallenge(@Req() req) {
+    return this.challengeService.findOneTakerByStatus(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/complete')
+  getCompleteChallenge(@Req() req) {
+    return this.challengeService.findOneCompletedTaker(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)

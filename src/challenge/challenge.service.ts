@@ -57,7 +57,7 @@ export class ChallengeService {
     if(active.length > 0){
       throw new BadRequestException('You have an ongoing challenge, you cannot take another challenge at the moment');
     }
-    
+
     if (!challenge) {
       throw new NotFoundException(`taking with ID "${challengeId}" not found`);
     }
@@ -288,6 +288,34 @@ export class ChallengeService {
       
     }
     
+  }
+
+  async findOneCompletedTaker(userId: number): Promise<Taker[]> {
+    try {
+      return this.takerRepository.find({
+        where: {
+          user: { id: userId }, 
+          status: Status.COMPLETED,
+          
+         },
+        relations: ['user', 'challenge'], // Load relations to give full context
+      });
+    } catch (error) {
+      throw error;
+      
+    }
+    
+  }
+
+  async updateStatus(takerId: number): Promise<Taker> {
+    const take = await this.takerRepository.findOne({ where:{id: takerId} } );
+    if (!take) {
+      throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
+    }
+
+    take.status = Status.WITHDRAWN;
+
+    return this.takerRepository.save(take);
   }
 
   async findTakers(): Promise<Taker[]> {
