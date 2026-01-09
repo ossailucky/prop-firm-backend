@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, ParseIntPipe, Req, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, ParseIntPipe, Req, UploadedFile, Query } from '@nestjs/common';
 import { ChallengeService } from './challenge.service';
 import { CreateChallengeDto, RequestReviewDto, TradingLoginDetailsDTO } from './dto/create-challenge.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
@@ -10,6 +10,7 @@ import { extname } from 'path';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/user/entities/user.entity';
 import { log } from 'console';
+import { Status } from './entities/challenge.entity';
 
 @ApiTags("challenge")
 @Controller({version: "1", path: "challenge"})
@@ -86,11 +87,18 @@ export class ChallengeController {
     return this.challengeService.sendTradingLoginByEmail(takerId, detailsDto);
   }
 
-  //@UseGuards(JwtAuthGuard)
-  //@hasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
   @Patch('/confirm-phase/:takerId')
   confirmChallengePhase(@Param('takerId', ParseIntPipe) takerId: number) {
     return this.challengeService.confirmPhase(takerId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Patch('/reject-phase/:takerId')
+  failChallengePhase(@Param('takerId', ParseIntPipe) takerId: number) {
+    return this.challengeService.failPhaseConfirm(takerId);
   }
 
 
@@ -99,6 +107,12 @@ export class ChallengeController {
   @Get("/trading-account")
   findOne(@Req() req,) {
     return this.challengeService.getTradingDetails(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("/challenge-by-status")
+  challengeByStatus(@Query('status') status: Status) {
+    return this.challengeService.findTakersByStatus(status);
   }
 
   // @Patch(':id')

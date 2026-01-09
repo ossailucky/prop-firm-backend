@@ -89,13 +89,13 @@ export class UserController {
   //   return this.userService.NotifyUser(id, messageDto.message);
   // }
 
-  // @Patch(':id/update')
-  // async updateRole(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() messageDto: any,
-  // ) {
-  //   return this.userService.updateUser(id, messageDto);
-  // }
+  @Patch(':id/update')
+  async updateRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() messageDto: any,
+  ) {
+    return this.userService.updateUser(id, messageDto);
+  }
 
   // @Patch(':id/active-false')
   // async updateDeactive(

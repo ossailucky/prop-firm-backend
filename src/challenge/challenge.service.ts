@@ -267,6 +267,46 @@ export class ChallengeService {
     
   }
 
+
+  async failPhaseConfirm(takerId: number): Promise<Taker> {
+    try {
+      const take = await this.takerRepository.findOne({
+        where: { id: takerId },
+        relations: ['user','challenge'], // Ensure the user relation is loaded
+      });
+      
+         
+      
+      if (!take) {
+        throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
+      }
+  
+      // Admin can only approve stakes that are in the CLOSED (withdrawal requested) state
+      if (take.status !== Status.REVIEW) {
+        throw new BadRequestException(`Only challenges with status REVIEW can be updated. Current status is "${take.status}".`);
+      }
+
+      if(take.phase >3){
+        take.status = Status.COMPLETED;
+        await this.mailService.challengeCompleted(take.user.email,take.user.fullName,take.amount,take.phase,take.profit,'COMPLETED');
+        return this.takerRepository.save(take);
+      }
+  
+      take.status = Status.ACTIVE;
+      
+
+      const message = `You've not meet the trading Profit Threshold for the Next phase, please continue trading  ${take.phase}  to meet the required benchmark. You can do this!`;
+      
+      await this.mailService.confirmChallengePhase(take.user.email,take.user.fullName,message);
+      
+      return this.takerRepository.save(take);
+    } catch (error) {
+      throw error;
+      
+    }
+    
+  }
+
   generateSecureCode(length = 6) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     return Array.from(crypto.randomBytes(length))

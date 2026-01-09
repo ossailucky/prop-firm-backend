@@ -207,7 +207,7 @@ export class MailService {
     
      await this.mailerService.sendMail({
        to: userEmail,
-       subject: `Review Result Confirmation`,
+       subject: `Evaluation Result `,
        template: './review-confirm',
        context: {
          username,
