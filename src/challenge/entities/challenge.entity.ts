@@ -8,7 +8,8 @@ export enum Status {
     CLOSED = 'CLOSED',
     REVIEW = "REVIEW",
     COMPLETED = "COMPLETED",
-    WITHDRAWN = "WITHDRAWN"
+    WITHDRAWN = "WITHDRAWN",
+    REJECTED = "REJECTED"
     
   }
 
@@ -41,10 +42,10 @@ export class Challenge {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   phaseThree?: number;
       
-  @Column()
+  @Column({default:""})
   oneTimeFee?: string;
   
-  @Column()
+  @Column({default: ""})
   minBenchmark?: string;
 
   @OneToMany(() => Taker, taker => taker.challenge, { cascade: true })

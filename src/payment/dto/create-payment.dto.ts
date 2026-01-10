@@ -24,3 +24,30 @@ export class CreatePaymentDto {
   accountName?: string;
 }
 
+export class CreateReferralDto {
+    @IsEnum(PaymentMethod)
+    method: PaymentMethod;
+  
+    @IsNumber()
+    @IsNotEmpty()
+    amount: number;
+    
+    // For crypto
+    @IsOptional()
+    @IsString()
+    cryptoAddress?: string;
+  
+    // For bank
+    @IsOptional()
+    @IsString()
+    bankName?: string;
+  
+    @IsOptional()
+    @IsString()
+    accountNumber?: string;
+  
+    @IsOptional()
+    @IsString()
+    accountName?: string;
+  }
+

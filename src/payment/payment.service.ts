@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { CreatePaymentDto, CreateReferralDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { Payment, PaymentStatus } from './entities/payment.entity';
 import { Repository } from 'typeorm';
@@ -49,10 +49,12 @@ export class PaymentService {
     // }
 
 
+    const profitCalculation =  taker.challenge.profitTarget - taker.amount;
+    const finalAmount = 0.90 * profitCalculation;
 
     const withdrawal = this.paymentRepository.create({
       user,
-      amount: taker.amount,
+      amount: finalAmount,
       method: dto.method,
       cryptoAddress: dto.cryptoAddress,
       bankName: dto.bankName,
@@ -79,6 +81,34 @@ export class PaymentService {
     
   }
 
+  async referralWithdrawal(userId: number, dto: CreateReferralDto) {
+    try {
+      const user = await this.userService.findById(userId);
+
+    if (!user) throw new NotFoundException('User not found');
+    const withdrawal = this.paymentRepository.create({
+      user,
+      amount: dto.amount,
+      method: dto.method,
+      cryptoAddress: dto.cryptoAddress,
+      bankName: dto.bankName,
+      accountName: dto.accountName,
+      accountNumber: dto.accountNumber,
+    });
+    const add = await this.userService.addUserPayment(userId, withdrawal);
+    if (!add) {
+      throw new BadRequestException('Issue creating withdrawal.');
+    }
+
+    await this.userService.decreaseUserBalance(withdrawal.user.id, withdrawal.amount);
+    await this.mailService.sendWithdrawalConfirmation(user.email, user.fullName, dto.amount, PaymentStatus.PENDING,dto.method);
+    await this.mailService.sendAdminWithdrawalAlert(user.fullName, dto.amount, PaymentStatus.PENDING)
+    return this.paymentRepository.save(withdrawal);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getUserWithdrawals(userId: number) {
     return this.paymentRepository.find({
       where: { user: { id: userId } },
@@ -97,8 +127,6 @@ export class PaymentService {
     }
     
     withdrawal.status = PaymentStatus.APPROVED;
-
-    await this.userService.decreaseUserBalance(withdrawal.user.id, withdrawal.amount);
 
     
     await this.mailService.sendUserWithdrawalApproved(withdrawal.user.email, withdrawal.user.fullName, withdrawal.amount, PaymentStatus.APPROVED, withdrawal.method);

@@ -17,14 +17,23 @@ import { Status } from './entities/challenge.entity';
 export class ChallengeController {
   constructor(private readonly challengeService: ChallengeService) {}
 
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
   @Post("create")
   create(@Body() createChallengeDto: CreateChallengeDto) {
     return this.challengeService.create(createChallengeDto);
   }
 
+
   @Get()
   findAll() {
     return this.challengeService.findAll();
+  }
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Get("takers")
+  findAllTakers() {
+    return this.challengeService.findTakers();
   }
 
   @UseGuards(JwtAuthGuard)
@@ -56,10 +65,17 @@ export class ChallengeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  //@hasRoles(UserRole.ADMIN)
+  @hasRoles(UserRole.ADMIN)
   @Patch('/approve/:takerId')
   approveChallenge(@Param('takerId', ParseIntPipe) takerId: number) {
     return this.challengeService.approveChallenge(takerId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Patch('/reject/:takerId')
+  rejectChallenge(@Param('takerId', ParseIntPipe) takerId: number) {
+    return this.challengeService.rejectChallenge(takerId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -78,6 +94,12 @@ export class ChallengeController {
   @Post('/request-review/:takerId')
   requestReviewChallenge(@Param('takerId', ParseIntPipe) takerId: number, @Req() req, @Body() requestReviewDto: RequestReviewDto)  {
     return this.challengeService.requestReview(takerId, req.user.id, requestReviewDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/my-challenge')
+  allUserChallenge( @Req() req )  {
+    return this.challengeService.findAllByUser( req.user.id,);
   }
 
   @UseGuards(JwtAuthGuard)

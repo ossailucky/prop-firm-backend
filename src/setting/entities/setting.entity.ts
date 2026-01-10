@@ -12,7 +12,7 @@ export class Setting {
   @Column()
   appDescription: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column()
   refferalPercentage: number;
 
   @Column()

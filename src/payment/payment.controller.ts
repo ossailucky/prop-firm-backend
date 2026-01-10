@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { CreatePaymentDto, CreateReferralDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -20,6 +20,13 @@ export class PaymentController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post("create/referral-withdrawal")
+  referral(@Req() req, @Body() dto: CreateReferralDto) {
+    return this.paymentService.referralWithdrawal(req.user.id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
   @Get()
   list(@Req() req) {
     return this.paymentService.getUserWithdrawals(req.user.id);

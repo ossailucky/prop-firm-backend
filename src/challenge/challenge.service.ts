@@ -6,6 +6,7 @@ import { UserService } from 'src/user/user.service';
 import { MailService } from 'src/mail/mail.service';
 import { Challenge, Status, Taker, TradingLoginDetails } from './entities/challenge.entity';
 import crypto from "crypto";
+import { SettingService } from 'src/setting/setting.service';
 
 @Injectable()
 export class ChallengeService {
@@ -18,6 +19,7 @@ export class ChallengeService {
     private readonly tradingRepository: Repository<TradingLoginDetails>,
     private readonly userService: UserService,
     private readonly mailService: MailService,
+    private readonly settingsService: SettingService,
   ) {}
 
   async create(createChallengeDto: CreateChallengeDto, ): Promise<Challenge> {
@@ -70,9 +72,9 @@ export class ChallengeService {
       throw new NotFoundException('User not found.');
     }
 
-    if(user.isEmailVerified === false){
-      throw new BadRequestException('Your email is not verifield yet, please verify your email');
-    }
+    // if(user.isEmailVerified === false){
+    //   throw new BadRequestException('Your email is not verifield yet, please verify your email');
+    // }
 
   
     const newTaker = this.takerRepository.create({
@@ -116,14 +118,32 @@ export class ChallengeService {
 
     const referee = await this.userService.findByrefferalCode(take.user.referralCode);
 
+    const settings = await this.settingsService.findById(1);
     if(referee){
-      const bonusAmount = (take.fee * 10) / 100; // 10% of the challenge fee
+      const bonusAmount = (take.fee * settings.refferalPercentage) / 100; // 10% of the challenge fee
       await this.userService.increaseUserBalance(referee.id, bonusAmount);
       await this.mailService.sendRefferralBonus(referee.email,referee.fullName,take.user.fullName,bonusAmount);
 
       await this.userService.updateReferee(take.user.id);
       return this.takerRepository.save(take);
     }
+    return this.takerRepository.save(take);
+  }
+
+  async rejectChallenge(takerId: number): Promise<Taker> {
+    const take = await this.takerRepository.findOne({ where:{id: takerId}, relations: ['user']  } );
+    if (!take) {
+      throw new NotFoundException(`take entry with ID "${takerId}" not found.`);
+    }
+
+    if (take.status !== Status.PENDING) {
+      throw new BadRequestException(`take is already in status "${take.status}" and cannot be rejected.`);
+    }
+
+    take.status = Status.REJECTED;
+
+    
+
     return this.takerRepository.save(take);
   }
 
@@ -338,6 +358,8 @@ export class ChallengeService {
     }
     
   }
+
+  
 
   async findOneTakerByStatus(userId: number): Promise<Taker[]> {
     try {
