@@ -20,7 +20,7 @@ export class PaymentController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("create/referral-withdrawal")
+  @Post("referral-withdrawal")
   referral(@Req() req, @Body() dto: CreateReferralDto) {
     return this.paymentService.referralWithdrawal(req.user.id, dto);
   }

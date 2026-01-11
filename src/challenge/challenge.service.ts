@@ -7,6 +7,7 @@ import { MailService } from 'src/mail/mail.service';
 import { Challenge, Status, Taker, TradingLoginDetails } from './entities/challenge.entity';
 import crypto from "crypto";
 import { SettingService } from 'src/setting/setting.service';
+import { UpdateChallengeDto } from './dto/update-challenge.dto';
 
 @Injectable()
 export class ChallengeService {
@@ -38,6 +39,22 @@ export class ChallengeService {
         oneTimeFee,
         minBenchmark
       });
+
+      return this.challengeRepository.save(challenge);
+    } catch (error) {
+      throw error;
+      
+    }
+  }
+
+  async editChallenge(id: number, updateChallengeDto: UpdateChallengeDto): Promise<Challenge> {
+    try {
+      const challenge = await this.challengeRepository.findOneBy({ id });
+      if (!challenge) {
+        throw new NotFoundException('Challenge not found');
+      }
+
+      Object.assign(challenge, updateChallengeDto);
 
       return this.challengeRepository.save(challenge);
     } catch (error) {

@@ -86,6 +86,10 @@ export class PaymentService {
       const user = await this.userService.findById(userId);
 
     if (!user) throw new NotFoundException('User not found');
+
+    if( dto.amount > user.accountBalance) {  
+      throw new BadRequestException('Insufficient referral balance.');
+    }
     const withdrawal = this.paymentRepository.create({
       user,
       amount: dto.amount,

@@ -36,8 +36,8 @@ export class UserController {
     return this.userService.resetPassword(dto,token);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @hasRoles(UserRole.ADMIN)
+  // @UseGuards(JwtAuthGuard)
+  // @hasRoles(UserRole.ADMIN)
   @Get()
   findAll() {
     return this.userService.findAll();

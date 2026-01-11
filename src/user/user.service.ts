@@ -123,7 +123,7 @@ async forgotPassword(email: string) {
     expiresIn: '15m',
   });
 
-  const resetUrl = `${process.env.APP_URL}/change-password?token=${token}`; // or frontend URL
+  const resetUrl = `${process.env.APP_URL}/reset-password?token=${token}`; // or frontend URL
 
   await this.mailService.sendPasswordReset(user.email,resetUrl,user.fullName);
 

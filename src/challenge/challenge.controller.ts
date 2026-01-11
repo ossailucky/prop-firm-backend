@@ -24,6 +24,14 @@ export class ChallengeController {
     return this.challengeService.create(createChallengeDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @hasRoles(UserRole.ADMIN)
+  @Patch('edit/:id')
+  editChallenge(@Param('id', ParseIntPipe) id: number, @Body() updateChallengeDto: UpdateChallengeDto) {
+    return this.challengeService.editChallenge(id, updateChallengeDto);
+  }
+
+
 
   @Get()
   findAll() {
